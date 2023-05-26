@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Icon/18/推广@3x</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="18" height="18"></rect>
+    </defs>
+    <g id="Icon/18/推广" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="路径-3-+-路径-5-+-路径-6蒙版">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="蒙版"></g>
+            <line x1="1.23457102" y1="1.73855041" x2="16.5530157" y2="1.73855041" id="路径-3" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" mask="url(#mask-2)"></line>
+            <path d="M2.43509459,2.23681324 L2.43509459,15.3329256 C2.43509459,15.8852104 2.88280984,16.3329256 3.43509459,16.3329256 C3.58308859,16.3329256 3.72923766,16.3000771 3.86299824,16.23675 L9.5,13.5679863 L9.5,13.5679863 L13.9986585,16.0815179 C14.4807912,16.3508995 15.090014,16.1784307 15.3593956,15.6962979 C15.4426875,15.547224 15.486417,15.3793041 15.486417,15.2085393 L15.486417,4.45431685 L15.486417,4.45431685" id="路径-5" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" mask="url(#mask-2)"></path>
+            <polyline id="路径-6" stroke="#FC708B" stroke-linecap="round" stroke-linejoin="round" mask="url(#mask-2)" points="6.02129534 8.38153374 5 7.20576867 12.5774242 5.33334374 8.92727711 11.4297237 7.85342228 10.2125994 6.78356675 10.9912892 6.78356675 9.35517797 9.39893889 7.43095741"></polyline>
+        </g>
+    </g>
+</svg>

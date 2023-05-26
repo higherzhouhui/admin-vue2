@@ -1,0 +1,32 @@
+/* src/styles/element-variables.scss */
+$--font-path: '~element-ui/lib/theme-chalk/fonts';
+
+$theme: var(--theme) !default;
+
+// sidebar
+$menuText:var(--menuText);
+$menuActiveText:var(--menuActiveText);
+$subMenuActiveText:var(--subMenuActiveText); //https://github.com/ElemeFE/element/issues/12951
+
+$menuBg:var(--menuBg);
+$menuHover:var(--menuHover);
+$subMenuBg:var(--subMenuBg);
+$subMenuHover:var(--subMenuHover);
+$sideBarWidth: 100px;
+$navbarHeight: 60px;
+$subSideBarWidth: 150px;
+$tagViewHeight: 50px;
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+:export {
+  menuText: $menuText;
+  menuActiveText: $menuActiveText;
+  subMenuActiveText: $subMenuActiveText;
+  menuBg: $menuBg;
+  menuHover: $menuHover;
+  subMenuBg: $subMenuBg;
+  subMenuHover: $subMenuHover;
+  sideBarWidth: $sideBarWidth;
+  subSideBarWidth: $subSideBarWidth;
+  theme: $theme;
+}

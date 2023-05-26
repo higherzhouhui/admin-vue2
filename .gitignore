@@ -1,0 +1,26 @@
+.DS_Store
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+tests/**/coverage/
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+/.gradle/buildOutputCleanup/cache.properties
+/.gradle/checksums/checksums.lock
+/.gradle/6.5/executionHistory/executionHistory.lock
+/.gradle/6.5/fileHashes/fileHashes.lock
+/.gradle/6.5/gc.properties
+/.gradle/vcs-1/gc.properties
+/.gradle/6.5/fileChanges/last-build.bin
+/live-admin-web.iml
+./vue-config.js

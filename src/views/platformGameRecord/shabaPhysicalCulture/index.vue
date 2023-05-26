@@ -1,0 +1,415 @@
+<template>
+  <div class="app-container">
+    <DatePicker v-model="pickerValue" @change="handleSearchFilter2(listQuery.flagTime, $event)">
+      <el-form-item>
+        <!-- 筛选状态 -->
+        <el-select v-model="listQuery.flagTime" size="small" placeholder="请选择启禁状态" @change="handleSearchFilter2">
+          <el-option v-for="item in flagOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+      </el-form-item>
+    </DatePicker>
+    <el-form :inline="true">
+      <!-- <el-form-item>
+        <el-tag type="info">投注时间:</el-tag>
+        <el-date-picker v-model="listQuery.pickerValue2" size="small" clearable type="datetimerange"
+          :picker-options="pickerOptions" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
+          align="right" format="yyyy-MM-dd HH:mm" :default-time="['00:00:00', '23:59:59']" value-format="timestamp"
+          @change="handleSearchFilter" />
+      </el-form-item> -->
+      <el-form-item>
+        <el-input v-model="listQuery.uid" size="small" style="width: 200px" placeholder="请输入用户ID" clearable
+          oninput="value=value.replace(/[^\d]/g,'')" @keyup.enter.native="handleSearchFilter"
+          @clear="handleSearchFilter" />
+      </el-form-item>
+      <!-- <el-form-item>
+        <el-tag type="info">结算时间:</el-tag>
+        <el-date-picker v-model="listQuery.pickerValue" size="small" clearable type="datetimerange"
+          :picker-options="pickerOptions" range-separator="~" start-placeholder="开始日期" end-placeholder="结束日期"
+          align="right" format="yyyy-MM-dd HH:mm" :default-time="['00:00:00', '23:59:59']" value-format="timestamp"
+          @change="handleSearchFilter" />
+      </el-form-item> -->
+      <el-form-item>
+        <el-button size="small" icon="el-icon-search" type="primary" @click="handleSearchFilter">搜索</el-button>
+        <!-- 重置 -->
+        <el-button size="small" icon="el-icon-refresh" @click="refreshData">重置</el-button>
+      </el-form-item>
+      <!-- <el-form-item>
+          <el-button
+            size="small"
+            :loading="downloadLoading"
+            type="success"
+            icon="el-icon-document"
+            @click="handleDownload"
+          >
+            导出Excel
+          </el-button>
+        </el-form-item> -->
+      <br />
+      <el-form-item>
+        <el-button type="primary" size="small" @click="(dialogCreateVisible = true), resetCreateModel()">补偿</el-button>
+      </el-form-item>
+      <el-form-item v-if="newestTime">
+        <span>
+          最新版本号：{{ newestTime }}
+        </span>
+      </el-form-item>
+    </el-form>
+
+    <el-table v-cloading="listLoading" :data="list" size="mini">
+      <el-table-column type="index" label="序号" width="60" />
+      <el-table-column label="用户ID" min-width="120">
+        <template slot-scope="{ row }">
+          <user-drawer :uid="row.uid" />
+        </template>
+      </el-table-column>
+      <el-table-column prop="referenceNo" label="单号" min-width="150" />
+      <el-table-column prop="betAmount" label="下注金额" min-width="100" />
+      <el-table-column prop="afterAmount" label="下注候金额" min-width="100" />
+      <el-table-column prop="winAmount" label="输赢金额" width="100" />
+      <el-table-column prop="dataJson" label="投注详情" width="100">
+        <template slot-scope="{ row }">
+          <AnalysisJSON :data="row.dataJson" />
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="versionKey" label="版本号" min-width="100">
+      </el-table-column>
+      <el-table-column prop="winLoseStatus" label="winLoseStatus" min-width="100" />
+      <el-table-column prop="createTime2" label="创建时间" width="140" />
+      <el-table-column prop="lastVersionKey" label="上次版本号" width="100" />
+      <el-table-column prop="validBetAmount" label="有效投注" min-width="100" />
+      <el-table-column prop="dataType" label="数据类型" min-width="100" />
+      <el-table-column prop="startTime2" label="开始时间" min-width="140" />
+      <el-table-column prop="endTime2" label="结束时间" min-width="140" />
+    </el-table>
+
+    <!-- 分页 -->
+    <el-pagination class="vue-pagination" background :current-page="listQuery.page"
+      :page-sizes="[10, 20, 50, 100, 500, 1000]" :page-size="listQuery.limit"
+      layout="total, sizes, prev, pager, next, jumper" :total="listQuery.total" @size-change="handleSizeChange"
+      @current-change="handleCurrentChange" />
+
+    <!-- 游戏数据手动补偿 -->
+    <!-- 游戏数据手动补偿 -->
+    <el-dialog title="游戏数据补偿" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" :destroy-on-close="true">
+      <div v-cloading="dialogCreateLoading" style="width: 100%; height: 100%">
+        <el-form ref="dataForm" :inline="true" :model="createModel" label-position="top" label-width="100px" size="medium"
+          style="display: flex; flex-direction: column; align-items: center">
+          <div style="display: flex;flex-direction: column;align-items: flex-start;">
+            <el-form-item label="补偿日期">
+              <el-date-picker style="width: 260px" v-model="createModel.day" type="date" format="yyyy-MM-dd"
+                value-format="yyyyMMdd" placeholder="请选择补偿日期">
+              </el-date-picker>
+            </el-form-item>
+            <!-- <el-form-item label="游戏类型">
+            <el-select
+              v-model="createModel.gameType"
+              placeholder="请选择游戏类型"
+              style="width: 260px"
+            >
+              <el-option label="BG捕鱼大师" value="105"></el-option>
+              <el-option label="西游捕鱼" value="411"></el-option>
+              <el-option label="大仙捕鱼大师" value="484"></el-option>
+            </el-select>
+          </el-form-item> -->
+            <el-form-item label="添加流水">
+              <el-radio-group v-model="createModel.addFlow">
+                <el-radio :label="true">是</el-radio>
+                <el-radio :label="false">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </div>
+        </el-form>
+      </div>
+
+      <div slot="footer">
+        <el-button size="medium" @click="dialogCreateVisible = false">取消</el-button>
+        <el-button size="medium" type="primary" @click="handleDataClick()">确定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { recordXg } from "@/api/platformGameRecord/shabaPhysicalCulture";
+import { dayCompensate } from "@/api/platformGameRecord/bgRealPerson";
+
+import { emptyS, nullS, formatUnixTime, getDateTime } from "@/utils/tools";
+import UserDrawer from "@/components/UserDrawer";
+import AnalysisJSON from "@/components/AnalysisJSON";
+const { NOW_TIME_START, NOW_TIME_END } = getDateTime()
+
+export default {
+  name: 'PlatformGameRecordShabaPhysicalCultureIndex',
+  components: {
+    UserDrawer,
+    AnalysisJSON,
+  },
+  data() {
+    return {
+      pickerValue: [NOW_TIME_START, NOW_TIME_END],
+      list: [],
+      listLoading: true,
+      listQuery: {
+        flagTime: 0,
+        page: 1,
+        limit: 20,
+        total: 0,
+        uid: null,
+        type: null,
+        pickerValue: [],
+        pickerValue2: []
+      },
+      flagOptions: [
+        { label: '投注时间', value: 0 },
+        { label: '结算时间', value: 1 }
+      ],
+      newestTime: '',
+      downloadLoading: false,
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+        ],
+      },
+      dialogCreateVisible: false,
+      dialogCreateLoading: false,
+      // 表单模型
+      createModel: {
+        day: null,
+        gameName: "",
+        gameType: "",
+        addFlow: false,
+      },
+      // 重新设置表单数据
+      resetCreateModel() {
+        this.createModel = {
+          day: null,
+          gameName: "",
+          gameType: "",
+          addFlow: false,
+        };
+      },
+    };
+  },
+  created() {
+    // 获取uid
+    console.log("接收uid", this.$route.query.uid);
+    this.listQuery.uid = this.$route.query.uid;
+    this.fetchData();
+  },
+  methods: {
+    // 刷新
+    refreshData() {
+      this.list = null;
+      this.listLoading = true;
+      let flagTime = this.listQuery.flagTime
+      this.listQuery = {
+        page: 1,
+        limit: 20,
+        total: 0,
+        uid: null,
+        type: null,
+        flagTime
+      };
+      this.pickerValue = [NOW_TIME_START, NOW_TIME_END]
+      setTimeout(() => {
+        this.fetchData();
+      }, 80);
+    },
+    handleDataClick() {
+      // this.createModel
+      // this.dialogCreateVisible = false;
+      if (
+        this.createModel.day == null ||
+        this.createModel.day == undefined ||
+        this.createModel.day.length == 0
+      ) {
+        this.$message({
+          message: "请选择补偿时间",
+          type: "warning",
+        });
+        return;
+      }
+      this.dialogCreateLoading = true;
+      this.createModel.gameName = "sb";
+      console.log("this.createModel", this.createModel);
+      dayCompensate(this.createModel)
+        .then((item) => {
+          this.$notify({
+            title: "提示",
+            message: "游戏数据补偿成功",
+            type: "success",
+            duration: 1500,
+          });
+          this.dialogCreateVisible = false;
+          this.dialogCreateLoading = false;
+        })
+        .catch((err) => {
+          this.dialogCreateLoading = false;
+          this.$message.error(err);
+        });
+    },
+    // 获取列表数据
+    fetchData() {
+      this.listLoading = true;
+      this.familyList = [];
+      if (this.listQuery.flagTime == 0) this.listQuery.pickerValue2 = this.pickerValue
+      else this.listQuery.pickerValue = this.pickerValue
+      recordXg(this.listQuery.limit, this.listQuery.page, this.listQuery)
+        .then((res) => {
+          this.newestTime = res.data.ext.lastTime
+          this.list = (res.data.list || []).map((item) => {
+            item.createTime2 =
+              item.createTime != null && item.createTime != undefined
+                ? formatUnixTime(item.createTime)
+                : "";
+            item.startTime2 =
+              item.startTime != null && item.startTime != undefined
+                ? formatUnixTime(item.startTime)
+                : "";
+            item.endTime2 =
+              item.endTime != null && item.endTime != undefined
+                ? formatUnixTime(item.endTime)
+                : "";
+            return item;
+          });
+          this.listQuery.total = res.data.total;
+          this.listLoading = false;
+        })
+        .catch((err) => {
+          this.list = null;
+          this.listQuery.total = 0;
+          this.listLoading = false;
+          this.$message.error(err);
+        });
+    },
+    handleDownload() {
+      if (this.list.length > 10000) {
+        this.$message.error('导出限制10000条范围内')
+        return
+      }
+      this.downloadLoading = true;
+      import("@/vendor/Export2Excel").then((excel) => {
+        const tHeader = [
+          "主播ID",
+          "主播昵称",
+          "家族名称",
+          "是否金牌主播",
+          "总礼物价值",
+          "总付费价值",
+          "总彩票流水",
+          "主播收益",
+          "家族长收益",
+          "发放收益星币",
+          "有效时间",
+          "收益归属时间",
+          "创建时间",
+        ];
+        const filterVal = [
+          "uid",
+          "nickname",
+          "familyName",
+          "goldMedalString",
+          "totalMl",
+          "totalFfml",
+          "totalCp",
+          "anchorProfit",
+          "bossProfit",
+          "subsidy",
+          "activeTime",
+          "belong",
+          "gmtCreateString",
+        ];
+        const list = this.list;
+        const data = this.formatJson(filterVal, list);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: this.filename,
+          autoWidth: this.autoWidth,
+          bookType: this.bookType,
+        });
+        this.downloadLoading = false;
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map((v) =>
+        filterVal.map((j) => {
+          return v[j];
+        })
+      );
+    },
+    handleSearchFilter2(val, arr = [NOW_TIME_START, NOW_TIME_END]) {
+      if (val == 0) {
+        delete this.listQuery.pickerValue
+        this.listQuery.pickerValue2 = this.pickerValue
+      } else {
+        delete this.listQuery.pickerValue2
+        this.listQuery.pickerValue = this.pickerValue
+      }
+      // this.pickerValue = arr
+      this.handleSearchFilter()
+    },
+    // 过滤
+    handleSearchFilter() {
+      this.listQuery.page = 1;
+      this.fetchData();
+    },
+
+    // 每页的条数改变
+    handleSizeChange(val) {
+      this.listQuery.limit = val;
+      this.listQuery.page = 1;
+      this.fetchData();
+    },
+
+    // 当前页改变
+    handleCurrentChange(val) {
+      this.listQuery.page = val;
+      this.fetchData();
+    },
+  },
+};
+</script>
+<style scoped>
+.input-with-select {
+  background-color: #fff;
+  width: 360px;
+  margin-right: 10px;
+
+  /* .el-input-group__prepend {
+        background-color: #fff;
+      } */
+}
+
+.vue-pagination {
+  margin: 20px 0px;
+  padding: 0px;
+}
+</style>
