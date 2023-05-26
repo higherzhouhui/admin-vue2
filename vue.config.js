@@ -36,9 +36,8 @@ module.exports = {
     },
     proxy: {
       [process.env.VUE_APP_BASE_API]: {
-        // target: 'http://127.0.0.1:8080', // 运维打包替换
-        target: 'https://fbs-admin.testlive.vip/liveAdmin', // 测试环境
-        // target: 'http://192.168.50.10:8080', // dd本地环境
+        // target: 'https://fbs-admin.testlive.vip/liveAdmin', // 测试环境
+        target: 'http://admin.fbslive.com/liveAdmin', // 正式环境
         changeOrigin: true,
         ws: true,
         secure: false,

@@ -23,6 +23,7 @@ import {
 } from '@/router'
 
 import store from '@/store'
+import routes from '@/routers'
 
 const state = {
   tokenHeader: getTokenHeader(),
@@ -128,7 +129,8 @@ const actions = {
 
         // 获取用户所有权限
         getPermission(uid).then(res => {
-          data['routes'] = res.data || []
+          // console.log(routes, 1111)
+          data['routes'] = routes || res.data || []
           const defautArr = ['用户银行卡操作', '主播出款审核操作', '用户出款审核操作', '分享出款审核操作', '公司入款审核操作', 'usdt入款审核操作']
           const arr = []
           for (const i of defautArr) {
